@@ -193,9 +193,14 @@ int read_AllTxt( const char *filename )
 }
 
 
-int main()
+int main( int argc, char *argv[] )
 {
-    int rows = read_AllTxt( ALLTXT );
+    char filename[256];
+
+    if (argc > 1) { strcpy( filename, argv[1] ); }
+    else          { strcpy( filename, ALLTXT  ); }
+
+    int rows = read_AllTxt( filename );
 
     printf("\n rows=%d call+bands+modes=%d\n", rows, callinfo.calls);
     check_dupes();

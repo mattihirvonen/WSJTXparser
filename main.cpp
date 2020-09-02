@@ -33,6 +33,12 @@ enum WSJTX_fields { DATETIME=0, BAND, RXTX, MODE, RXLEVEL, SOMETHING, HZ, TOKEN1
 
 char tokens[MAXTOKENS][TOKENLEN];
 
+// Look up table for band data conversion
+char bandcvt[2][9][8] = {
+  { "1.8",  "3.5", "7.",  "10.", "14.", "18.", "21.", "24.", "28." },
+  { "160m", "80m", "40m", "30m", "20m", "17m", "15m", "12m", "10m" }
+};
+
 callinfo_t callinfo;
 
 //------------------------------------------------------------------------------
@@ -106,6 +112,17 @@ int issquare( char *token )
 }
 
 
+char *convert_bandinfo( char *band )
+{
+    for (int i = 0; i < 9; i++) {
+        if (strstr(band, bandcvt[0][i])) {
+            return bandcvt[1][i];
+        }
+    }
+    return NULL;
+}
+
+
 int find_callsign( char *callsign, char *band, char *mode )
 {
     for ( int ix = 0; ix < callinfo.calls; ix++ )
@@ -142,20 +159,23 @@ int add_callsign( char *callsign, char *band, char *mode, char *square  )
 
 int analyze_tokens( char tokens[][TOKENLEN])
 {
-    int newcall;
+    int  newcall;
+    char band[16];
+
+    strcpy( band, convert_bandinfo(tokens[BAND]) );
 
     if (strcmp(tokens[TOKEN1],"CQ") == 0) {
         if (strlen(tokens[TOKEN2])  >= 4) {
-            newcall = add_callsign(tokens[TOKEN2], tokens[BAND], tokens[MODE], tokens[TOKEN3]);
+            newcall = add_callsign(tokens[TOKEN2], band, tokens[MODE], tokens[TOKEN3]);
         }
         else {
-            newcall = add_callsign(tokens[TOKEN3], tokens[BAND], tokens[MODE], tokens[TOKEN4]);
+            newcall = add_callsign(tokens[TOKEN3], band, tokens[MODE], tokens[TOKEN4]);
         }
     }
     #if 1
     // Reply to "CQ"
     else {
-        newcall = add_callsign(tokens[TOKEN2], tokens[BAND], tokens[MODE], tokens[TOKEN3]);
+        newcall = add_callsign(tokens[TOKEN2], band, tokens[MODE], tokens[TOKEN3]);
     }
     #endif
     return newcall;
@@ -203,6 +223,6 @@ int main( int argc, char *argv[] )
     int rows = read_AllTxt( filename );
 
     printf("\n rows=%d call+bands+modes=%d\n", rows, callinfo.calls);
-    check_dupes();
+//    check_dupes();
     return 0;
 }

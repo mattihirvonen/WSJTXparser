@@ -6,6 +6,9 @@ Count resolution is:
   - mode (FT8, FT4, etc...)
   - band info
 
+Current hardware installation do not have CAT control to radio.
+So "band info" is same as WSJT-X application's default frequency value per band
+
 This source code is tested to build in
 
   - windows 7
